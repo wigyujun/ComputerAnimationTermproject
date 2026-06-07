@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 281297971921254767}
   - component: {fileID: 7677899663919304817}
   - component: {fileID: 8214348770515302764}
+  - component: {fileID: 7488650295580486504}
   m_Layer: 6
   m_Name: Enemy
   m_TagString: Enemy
@@ -186,9 +187,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27edc4997df7bb945870a07beb2ddd7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 0
+  useTouchDamage: 0
   contactDamage: 1
-  destroyY: -7
   coinReward: 1
 --- !u!114 &8214348770515302764
 MonoBehaviour:
@@ -209,6 +209,20 @@ MonoBehaviour:
   projectileSpeed: 5
   projectileDamage: 1
   aimAtPlayer: 1
+--- !u!114 &7488650295580486504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4657140185940013980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ad2e6949b2f0a948bcd1da625fafcda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBottomDespawn
+  targetCamera: {fileID: 0}
+  bottomDespawnOffset: 1
 --- !u!1 &5247212867296700457
 GameObject:
   m_ObjectHideFlags: 0

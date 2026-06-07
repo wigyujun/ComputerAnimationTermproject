@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4219891805513570201}
   - component: {fileID: 8461853564807245007}
   - component: {fileID: -4169764831395511293}
+  - component: {fileID: -6434351333264207584}
   m_Layer: 7
   m_Name: Arrow
   m_TagString: Untagged
@@ -183,3 +184,17 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
+--- !u!114 &-6434351333264207584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6431192346874330186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b1a2b361b1d15b46964e1c160fa3130, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileAutoDespawn
+  targetCamera: {fileID: 0}
+  extraMargin: 0.5

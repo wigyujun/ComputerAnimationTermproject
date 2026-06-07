@@ -10,9 +10,20 @@ public class MapNodeUI : MonoBehaviour
     [SerializeField] private Button button;
 
     [Header("Optional")]
-    [SerializeField] private Image iconImage;   // 있으면 사용, 없어도 됨
+    [SerializeField] private Image iconImage;
     [SerializeField] private Color lockedTextColor = new Color(0.7f, 0.7f, 0.7f, 1f);
     [SerializeField] private Color normalTextColor = Color.white;
+
+    [Header("Node Sprites")]
+    [SerializeField] private Sprite normalBattleSprite;
+    [SerializeField] private Sprite hardBattleSprite;
+    [SerializeField] private Sprite rewardSprite;
+    [SerializeField] private Sprite shopSprite;
+    [SerializeField] private Sprite bossSprite;
+
+    [Header("Locked Visual")]
+    [SerializeField] private Color lockedNodeTint = new Color(0.55f, 0.55f, 0.55f, 1f);
+    [SerializeField] private Color normalNodeTint = Color.white;
 
     private MapNodeData data;
     private MapManager mapManager;
@@ -38,7 +49,7 @@ public class MapNodeUI : MonoBehaviour
         if (data == null) return;
 
         RefreshLabel();
-        RefreshColor();
+        RefreshBackgroundSprite();
         RefreshInteractable();
         RefreshIcon();
     }
@@ -61,11 +72,19 @@ public class MapNodeUI : MonoBehaviour
             label.color = normalTextColor;
     }
 
-    private void RefreshColor()
+    private void RefreshBackgroundSprite()
     {
-        if (bgImage == null) return;
+        if (bgImage == null || data == null)
+            return;
 
-        bgImage.color = GetNodeColor(data.nodeType, data.nodeState);
+        bgImage.sprite = GetNodeSprite(data.nodeType);
+        bgImage.type = Image.Type.Simple;
+        bgImage.preserveAspect = true;
+
+        if (data.nodeState == NodeState.Locked)
+            bgImage.color = lockedNodeTint;
+        else
+            bgImage.color = normalNodeTint;
     }
 
     private void RefreshInteractable()
@@ -77,10 +96,11 @@ public class MapNodeUI : MonoBehaviour
 
     private void RefreshIcon()
     {
-        if (iconImage == null) return;
+        if (iconImage == null)
+            return;
 
-        // 아이콘 이미지를 별도로 안 쓸 거면 그냥 색만 맞춰줌
-        iconImage.color = GetIconColor(data.nodeType, data.nodeState);
+        // 아이콘을 안 쓸 거면 숨김
+        iconImage.gameObject.SetActive(false);
     }
 
     private void OnClick()
@@ -91,86 +111,69 @@ public class MapNodeUI : MonoBehaviour
         mapManager.OnNodeClicked(data.nodeId);
     }
 
+    private Sprite GetNodeSprite(NodeType nodeType)
+    {
+        switch (nodeType)
+        {
+            case NodeType.NormalBattle:
+                return normalBattleSprite;
+
+            case NodeType.HardBattle:
+                return hardBattleSprite;
+
+            case NodeType.Reward:
+                return rewardSprite;
+
+            case NodeType.Shop:
+                return shopSprite;
+
+            case NodeType.Boss:
+                return bossSprite;
+
+            default:
+                return normalBattleSprite;
+        }
+    }
+
     private string GetNodeLabel(MapNodeData node)
     {
-        if (node == null) return "노드";
+        if (node == null)
+            return "노드";
 
         switch (node.nodeType)
         {
             case NodeType.NormalBattle:
-                return "전투";
+                return $"전투 · {GetThemeLabel(node.themeType)}";
+
             case NodeType.HardBattle:
-                return "강적";
+                return $"긴급전투 · {GetThemeLabel(node.themeType)}";
+
+            case NodeType.Boss:
+                return $"보스 · {GetThemeLabel(node.themeType)}";
+
             case NodeType.Reward:
                 return "보상";
+
             case NodeType.Shop:
                 return "상점";
-            case NodeType.Boss:
-                return "보스";
+
             default:
                 return "노드";
         }
     }
 
-    private Color GetNodeColor(NodeType nodeType, NodeState nodeState)
+    private string GetThemeLabel(ThemeType themeType)
     {
-        // 상태 우선
-        switch (nodeState)
+        switch (themeType)
         {
-            case NodeState.Locked:
-                return new Color(0.28f, 0.28f, 0.28f, 1f);
-
-            case NodeState.Current:
-                return new Color(1.00f, 0.85f, 0.20f, 1f);
-
-            case NodeState.Cleared:
-                return new Color(0.55f, 0.55f, 0.55f, 1f);
-
-            case NodeState.Selectable:
-                return GetSelectableTypeColor(nodeType);
-        }
-
-        return Color.white;
-    }
-
-    private Color GetSelectableTypeColor(NodeType nodeType)
-    {
-        switch (nodeType)
-        {
-            case NodeType.NormalBattle:
-                return new Color(0.20f, 0.80f, 1.00f, 1f);   // 파랑
-            case NodeType.HardBattle:
-                return new Color(1.00f, 0.45f, 0.25f, 1f);   // 주황/빨강
-            case NodeType.Reward:
-                return new Color(0.35f, 0.95f, 0.45f, 1f);   // 초록
-            case NodeType.Shop:
-                return new Color(0.75f, 0.45f, 1.00f, 1f);   // 보라
-            case NodeType.Boss:
-                return new Color(0.95f, 0.15f, 0.20f, 1f);   // 진한 빨강
+            case ThemeType.Forest:
+                return "숲";
+            case ThemeType.Sky:
+                return "하늘";
+            case ThemeType.Sea:
+                return "바다";
             default:
-                return Color.white;
-        }
-    }
-
-    private Color GetIconColor(NodeType nodeType, NodeState nodeState)
-    {
-        if (nodeState == NodeState.Locked)
-            return new Color(0.6f, 0.6f, 0.6f, 1f);
-
-        switch (nodeType)
-        {
-            case NodeType.NormalBattle:
-                return new Color(0.85f, 0.95f, 1f, 1f);
-            case NodeType.HardBattle:
-                return new Color(1f, 0.9f, 0.8f, 1f);
-            case NodeType.Reward:
-                return new Color(0.9f, 1f, 0.9f, 1f);
-            case NodeType.Shop:
-                return new Color(0.95f, 0.9f, 1f, 1f);
-            case NodeType.Boss:
-                return new Color(1f, 0.85f, 0.85f, 1f);
-            default:
-                return Color.white;
+                return "없음";
         }
     }
 }

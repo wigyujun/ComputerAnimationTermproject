@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6034915240201767481}
   - component: {fileID: 931672517262480823}
   - component: {fileID: -4679569593115566141}
+  - component: {fileID: 4625226341136777374}
   m_Layer: 6
   m_Name: SeaEnemy_fish
   m_TagString: Enemy
@@ -86,12 +87,12 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 986506142884784662, guid: f01809a1b565b0947be9b2e375572468, type: 3}
+  m_Sprite: {fileID: -5753059612143045158, guid: 206882c280962404ebc9088a82c5198a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 7.48, y: 7.22}
+  m_Size: {x: 7.77, y: 7.29}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -135,9 +136,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27edc4997df7bb945870a07beb2ddd7b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 0
+  useTouchDamage: 0
   contactDamage: 0
-  destroyY: -7
   coinReward: 1
 --- !u!58 &6034915240201767481
 CircleCollider2D:
@@ -188,13 +188,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChargeEnemy
   playerTarget: {fileID: 0}
-  descendSpeed: 2
-  aimStartY: 2.5
-  aimDuration: 0.45
   dashSpeed: 8
-  dashLifeTime: 3
   contactDamage: 1
-  despawnY: -7.5
+  useDashLifeTime: 0
+  dashLifeTime: 3
+  battleCamera: {fileID: 0}
+  bottomDespawnOffset: 1.5
+  spriteAngleOffset: 160
 --- !u!114 &-4679569593115566141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209,3 +209,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHP: 5
   currentHP: 5
+--- !u!114 &4625226341136777374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4727709423894641932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ad2e6949b2f0a948bcd1da625fafcda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBottomDespawn
+  targetCamera: {fileID: 0}
+  bottomDespawnOffset: 1

@@ -24,15 +24,18 @@ public class MapManager : MonoBehaviour
     [SerializeField] private RectTransform viewport;
     [SerializeField] private RectTransform content;
     [SerializeField] private float startFocusViewportRatio = 0.35f;
+    [SerializeField] private float contentRightPadding = 500f;
 
-    [Header("Reward Only")]
+    [Header("Special Node Controllers")]
     [SerializeField] private RewardNodeController rewardNodeController;
+    [SerializeField] private ShopNodeController shopNodeController;
 
     private List<MapNodeData> nodes = new List<MapNodeData>();
     private readonly Dictionary<string, MapNodeUI> nodeUIMap = new Dictionary<string, MapNodeUI>();
 
     private string pendingSpecialNodeId;
 
+    // 런에 저장된 맵 상태를 복원하거나 새 층 맵을 생성한 뒤 UI를 구성한다.
     private void Start()
     {
         if (RunContext.CurrentFloor > 0)
@@ -73,6 +76,7 @@ public class MapManager : MonoBehaviour
         FocusToCurrentOrFirstSelectable();
     }
 
+    // 저장된 노드 데이터로 노드 버튼과 연결선을 다시 그려 맵 화면을 만든다.
     private void BuildMap()
     {
         ClearChildren(nodesRoot);
@@ -81,6 +85,8 @@ public class MapManager : MonoBehaviour
 
         if (nodes == null || nodes.Count == 0)
             return;
+
+        AdjustContentWidth();
 
         for (int i = 0; i < nodes.Count; i++)
         {
@@ -91,6 +97,27 @@ public class MapManager : MonoBehaviour
         {
             CreateLinesForNode(nodes[i]);
         }
+    }
+
+    private void AdjustContentWidth()
+    {
+        if (content == null || nodes == null || nodes.Count == 0)
+            return;
+
+        float maxX = 0f;
+
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (nodes[i] == null)
+                continue;
+
+            if (nodes[i].uiPosition.x > maxX)
+                maxX = nodes[i].uiPosition.x;
+        }
+
+        Vector2 size = content.sizeDelta;
+        size.x = Mathf.Max(size.x, maxX + contentRightPadding);
+        content.sizeDelta = size;
     }
 
     private void CreateNodeUI(MapNodeData data)
@@ -133,7 +160,10 @@ public class MapManager : MonoBehaviour
         Image line = Instantiate(linePrefab, linesRoot);
         RectTransform rt = line.GetComponent<RectTransform>();
 
-        if (rt == null) return;
+        if (rt == null)
+            return;
+
+        line.raycastTarget = false;
 
         Vector2 dir = to - from;
         float length = dir.magnitude;
@@ -148,11 +178,15 @@ public class MapManager : MonoBehaviour
         rt.localRotation = Quaternion.Euler(0f, 0f, angle);
     }
 
+    // 노드 클릭 시 전투/보상/상점 중 어떤 흐름으로 이어질지 결정하는 핵심 분기다.
     public void OnNodeClicked(string nodeId)
     {
         MapNodeData clickedNode = FindNode(nodeId);
-        if (clickedNode == null) return;
-        if (clickedNode.nodeState != NodeState.Selectable) return;
+        if (clickedNode == null)
+            return;
+
+        if (clickedNode.nodeState != NodeState.Selectable)
+            return;
 
         LockOtherSelectableNodes(clickedNode.nodeId);
         clickedNode.nodeState = NodeState.Current;
@@ -173,9 +207,11 @@ public class MapManager : MonoBehaviour
                 break;
 
             case NodeType.Shop:
-                Debug.Log("Shop 노드는 다음 단계에서 구현 예정");
+                OpenShopNode(clickedNode);
+                break;
 
-                // 아직 미구현이므로 선택 복구
+            default:
+                Debug.LogWarning($"MapManager: 처리되지 않은 노드 타입 - {clickedNode.nodeType}");
                 clickedNode.nodeState = NodeState.Selectable;
                 RunContext.SetMapNodes(nodes);
                 RefreshAll();
@@ -183,11 +219,12 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    // 선택한 전투 노드 정보를 RunContext에 저장하고 전투 씬으로 이동한다.
     private void EnterBattle(MapNodeData node)
     {
-        if (node == null) return;
+        if (node == null)
+            return;
 
-        // 네 현재 RunContext 시그니처 기준 유지
         RunContext.SetBattleEntry(node);
         RunContext.SetMapNodes(nodes);
 
@@ -196,7 +233,8 @@ public class MapManager : MonoBehaviour
 
     private void OpenRewardNode(MapNodeData node)
     {
-        if (node == null) return;
+        if (node == null)
+            return;
 
         string clickedNodeId = node.nodeId;
         pendingSpecialNodeId = clickedNodeId;
@@ -218,6 +256,32 @@ public class MapManager : MonoBehaviour
         });
     }
 
+    private void OpenShopNode(MapNodeData node)
+    {
+        if (node == null)
+            return;
+
+        string clickedNodeId = node.nodeId;
+        pendingSpecialNodeId = clickedNodeId;
+
+        if (shopNodeController == null)
+        {
+            Debug.LogError("MapManager: ShopNodeController 참조가 없습니다.");
+
+            node.nodeState = NodeState.Selectable;
+            pendingSpecialNodeId = null;
+            RunContext.SetMapNodes(nodes);
+            RefreshAll();
+            return;
+        }
+
+        shopNodeController.OpenShopPanel(() =>
+        {
+            CompleteSpecialNode(clickedNodeId);
+        });
+    }
+
+    // 보상/상점 처리 완료 후 다음 노드 해금 또는 다음 층 이동을 진행한다.
     private void CompleteSpecialNode(string nodeId)
     {
         MapNodeData node = FindNode(nodeId);
@@ -228,18 +292,32 @@ public class MapManager : MonoBehaviour
         }
 
         node.nodeState = NodeState.Cleared;
-        UnlockNextNodes(node);
-
         pendingSpecialNodeId = null;
+
+        // 1,2,4층 보상 노드 완료 시 다음 층으로 이동
+        if (IsFloorEndRewardNode(node))
+        {
+            int nextFloor = currentFloor + 1;
+
+            if (nextFloor <= 5)
+            {
+                Debug.Log($"[MapManager] 보상 노드 완료 -> {nextFloor}층 이동");
+                RunContext.PrepareForFloorChange(nextFloor);
+                SetFloor(nextFloor);
+                return;
+            }
+        }
+
+        // Shop 포함 일반 특수 노드는 다음 노드 열기
+        UnlockNextNodes(node);
 
         RunContext.SetMapNodes(nodes);
         RefreshAll();
         FocusToFirstSelectable();
 
-        Debug.Log($"MapManager: 특수 노드 완료 처리 - {node.nodeId}");
+        Debug.Log($"[MapManager] 특수 노드 완료 처리 - {node.nodeId}");
     }
 
-    // 보상 패널을 닫기만 하고 선택 안 했을 때 복구용
     public void CancelPendingSpecialNode()
     {
         if (string.IsNullOrEmpty(pendingSpecialNodeId))
@@ -256,9 +334,10 @@ public class MapManager : MonoBehaviour
         RunContext.SetMapNodes(nodes);
         RefreshAll();
 
-        Debug.Log("MapManager: 특수 노드 선택 취소");
+        Debug.Log("[MapManager] 특수 노드 선택 취소");
     }
 
+    // 전투 씬에서 돌아온 승패 결과를 현재 맵 노드 상태에 반영한다.
     private void ApplyPendingBattleResult()
     {
         if (RunContext.PendingBattleResult == BattleResult.None)
@@ -291,14 +370,27 @@ public class MapManager : MonoBehaviour
         RunContext.SetMapNodes(nodes);
     }
 
+    private bool IsFloorEndRewardNode(MapNodeData node)
+    {
+        if (node == null)
+            return false;
+
+        if (node.nodeType != NodeType.Reward)
+            return false;
+
+        return node.floorIndex == 1 || node.floorIndex == 2 || node.floorIndex == 4;
+    }
+
     private void LockOtherSelectableNodes(string exceptNodeId)
     {
-        if (nodes == null) return;
+        if (nodes == null)
+            return;
 
         for (int i = 0; i < nodes.Count; i++)
         {
             MapNodeData node = nodes[i];
-            if (node == null) continue;
+            if (node == null)
+                continue;
 
             if (node.nodeId == exceptNodeId)
                 continue;
@@ -312,7 +404,8 @@ public class MapManager : MonoBehaviour
 
     private void UnlockNextNodes(MapNodeData node)
     {
-        if (node == null || node.nextNodeIds == null) return;
+        if (node == null || node.nextNodeIds == null)
+            return;
 
         foreach (string nextId in node.nextNodeIds)
         {
@@ -336,7 +429,8 @@ public class MapManager : MonoBehaviour
     {
         foreach (var pair in nodeUIMap)
         {
-            if (pair.Value == null) continue;
+            if (pair.Value == null)
+                continue;
 
             MapNodeData data = FindNode(pair.Key);
             if (data != null)
@@ -348,7 +442,8 @@ public class MapManager : MonoBehaviour
 
     private void FocusToCurrentOrFirstSelectable()
     {
-        if (nodes == null || nodes.Count == 0) return;
+        if (nodes == null || nodes.Count == 0)
+            return;
 
         MapNodeData currentNode = nodes.Find(n => n.nodeState == NodeState.Current);
         if (currentNode != null)
@@ -362,7 +457,8 @@ public class MapManager : MonoBehaviour
 
     private void FocusToFirstSelectable()
     {
-        if (nodes == null || nodes.Count == 0) return;
+        if (nodes == null || nodes.Count == 0)
+            return;
 
         MapNodeData selectableNode = nodes.Find(n => n.nodeState == NodeState.Selectable);
         if (selectableNode != null)
@@ -373,7 +469,9 @@ public class MapManager : MonoBehaviour
 
     private void FocusToNode(MapNodeData node)
     {
-        if (node == null) return;
+        if (node == null)
+            return;
+
         if (scrollRect == null || viewport == null || content == null)
             return;
 
@@ -390,12 +488,13 @@ public class MapManager : MonoBehaviour
         float maxX = contentWidth - viewportWidth;
         float clampedX = Mathf.Clamp(targetX, 0f, maxX);
 
-        scrollRect.horizontalNormalizedPosition = clampedX / maxX;
+        scrollRect.horizontalNormalizedPosition = maxX <= 0f ? 0f : clampedX / maxX;
     }
 
     private void ClearChildren(Transform root)
     {
-        if (root == null) return;
+        if (root == null)
+            return;
 
         for (int i = root.childCount - 1; i >= 0; i--)
         {

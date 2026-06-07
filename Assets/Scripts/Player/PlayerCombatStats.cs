@@ -7,8 +7,8 @@ public class PlayerCombatStats : MonoBehaviour
     private const int maxWeaponLevel = 4;
 
     [Header("Combat")]
-    [SerializeField] private float attackSpeedPercent = 0f; // 0.20 = +20%
-    [SerializeField] private float attackPowerPercent = 0f; // 0.10 = +10%
+    [SerializeField] private float attackSpeedPercent = 0f;
+    [SerializeField] private float attackPowerPercent = 0f;
 
     public int WeaponLevel => weaponLevel;
     public int MaxWeaponLevel => maxWeaponLevel;
@@ -48,6 +48,13 @@ public class PlayerCombatStats : MonoBehaviour
                 default: return "활";
             }
         }
+    }
+
+    public void ApplyRunContextStats()
+    {
+        weaponLevel = Mathf.Clamp(RunContext.WeaponUpgradeLevel, 0, maxWeaponLevel);
+        attackSpeedPercent = Mathf.Max(0f, RunContext.AttackSpeedBonusPercent);
+        attackPowerPercent = Mathf.Max(0f, RunContext.AttackPowerBonusPercent);
     }
 
     public bool CanUpgradeWeapon()

@@ -2,23 +2,23 @@ using UnityEngine;
 
 public class PlayerWallet : MonoBehaviour
 {
-    [SerializeField] private int coin = 0;
-
-    public int Coin => coin;
+    public int Coin => RunContext.Coin;
 
     public void AddCoin(int amount)
     {
-        coin += amount;
-        if (coin < 0)
-            coin = 0;
+        if (amount <= 0)
+            return;
+
+        RunContext.AddCoin(amount);
     }
 
     public bool SpendCoin(int amount)
     {
-        if (coin < amount)
-            return false;
+        return RunContext.TrySpendCoin(amount);
+    }
 
-        coin -= amount;
-        return true;
+    public void SetCoin(int value)
+    {
+        RunContext.SetCoin(value);
     }
 }

@@ -5,6 +5,7 @@ public class BattleSceneEntry : MonoBehaviour
     [SerializeField] private BattleThemeController battleThemeController;
     [SerializeField] private GameManager gameManager;
 
+    // 전투 씬 진입 시 저장된 테마를 적용하고 실제 전투 시작을 트리거한다.
     private void Start()
     {
         Debug.Log("BattleSceneEntry Start 실행");

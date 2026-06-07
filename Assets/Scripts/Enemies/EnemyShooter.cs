@@ -91,4 +91,19 @@ public class EnemyShooter : MonoBehaviour
             Debug.LogWarning("EnemyShooter: EnemyProjectile 컴포넌트 없음");
         }
     }
+
+    public void SetFireInterval(float newInterval)
+    {
+        fireInterval = Mathf.Max(0.2f, newInterval);
+    }
+
+    public void SetProjectileSpeed(float newSpeed)
+    {
+        projectileSpeed = Mathf.Max(0.5f, newSpeed);
+    }
+
+    public void SetProjectileDamage(int newDamage)
+    {
+        projectileDamage = Mathf.Max(1, newDamage);
+    }
 }

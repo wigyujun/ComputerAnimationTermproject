@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2991411127455950069}
   - component: {fileID: 3177570249061393813}
-  - component: {fileID: 7788088471321232968}
-  m_Layer: 0
+  - component: {fileID: 1371839821587986290}
+  m_Layer: 8
   m_Name: Companion
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -79,21 +79,21 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: 695030823
+  m_SortingLayer: 2
+  m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 6192874186071401897, guid: 8442345a63fedfc42b7398c8f800e257, type: 3}
+  m_Sprite: {fileID: 5400842857526916573, guid: 9e7919b4b45982f4e8f017bb525f79e3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 3.99, y: 4.88}
+  m_Size: {x: 3.48, y: 4.73}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &7788088471321232968
+--- !u!114 &1371839821587986290
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -102,15 +102,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 3370923304367662108}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9044c7f270708324eb24d3964af458ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 8cfc9a7f834b5714882e18b821dcf34b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CompanionShooter
+  m_EditorClassIdentifier: Assembly-CSharp::AutoBowShooter
   firePoint: {fileID: 6781557110788205390}
-  projectilePrefab: {fileID: 6431192346874330186, guid: 4d879d931a4776640ad61797fe061d48, type: 3}
-  playerStats: {fileID: 0}
-  fireInterval: 0.55
-  baseDamage: 1
-  projectileSpeed: 10
+  playerCombatStats: {fileID: 0}
+  level0ProjectilePrefab: {fileID: 6431192346874330186, guid: 4d879d931a4776640ad61797fe061d48, type: 3}
+  level1ProjectilePrefab: {fileID: 5897752939379380728, guid: 703ba52c1158d684e84deda375ff6fbe, type: 3}
+  level2ProjectilePrefab: {fileID: 4132140093997456494, guid: 327dc447b2c48fc4fb051d66e79e70de, type: 3}
+  level3ProjectilePrefab: {fileID: 1750697456748214060, guid: 89dea7edef4fc7a458184f5d85992544, type: 3}
+  level4ProjectilePrefab: {fileID: 6468872191538227563, guid: 885a2671f9ad9da438b1b2bc946f52c9, type: 3}
+  baseShotInterval: 0.3
+  shootDirection: {x: 0, y: 1}
+  shotgunPelletCount: 3
+  shotgunSpreadAngle: 15
 --- !u!1 &8638950840038285472
 GameObject:
   m_ObjectHideFlags: 0
@@ -120,7 +125,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6781557110788205390}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FirePoint_C
   m_TagString: Untagged
   m_Icon: {fileID: 0}

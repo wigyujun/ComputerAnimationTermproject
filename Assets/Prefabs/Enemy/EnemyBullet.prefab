@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1842020769518394783}
   - component: {fileID: -6430154495469347605}
   - component: {fileID: -5814799531962685919}
+  - component: {fileID: 6218995451972933528}
   m_Layer: 0
   m_Name: EnemyBullet
   m_TagString: Untagged
@@ -80,7 +81,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -166601243
-  m_SortingLayer: 1
+  m_SortingLayer: 4
   m_SortingOrder: 20
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2406382395159343982, guid: 472fa6cc2c8ec4f4489f497e32cad47c, type: 3}
@@ -154,3 +155,17 @@ MonoBehaviour:
   speed: 5
   lifeTime: 4
   damage: 1
+--- !u!114 &6218995451972933528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6788222394326415993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b1a2b361b1d15b46964e1c160fa3130, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileAutoDespawn
+  targetCamera: {fileID: 0}
+  extraMargin: 0.5

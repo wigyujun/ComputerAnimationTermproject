@@ -7,30 +7,50 @@ public class BackgroundLooper : MonoBehaviour
     [SerializeField] private Transform bgB;
     [SerializeField] private SpriteRenderer bgARenderer;
     [SerializeField] private SpriteRenderer bgBRenderer;
+    [SerializeField] private Camera targetCamera;
 
     [Header("Scroll Settings")]
     [SerializeField] private float scrollSpeed = 2.0f;
     [SerializeField] private bool scrollOnStart = true;
-    [SerializeField] private float extraGap = 0f;
 
-    private float bgHeight;
+    [Header("Fit Settings")]
+    [SerializeField] private bool fitToCameraOnStart = true;
+    [SerializeField] private float scaleMultiplier = 1.02f;
+
+    [Header("Loop Settings")]
+    [SerializeField] private float seamOverlap = 0.05f;
+
     private bool isScrolling;
 
     private void Start()
     {
-        if (bgA == null || bgB == null || bgARenderer == null || bgBRenderer == null)
+        if (!ValidateReferences())
         {
-            Debug.LogWarning("BackgroundLooper: 배경 참조가 비어 있습니다.");
             enabled = false;
             return;
         }
 
-        CalculateHeight();
-        AlignBackgrounds();
+        if (targetCamera == null)
+            targetCamera = Camera.main;
+
+        if (targetCamera == null)
+        {
+            Debug.LogWarning("BackgroundLooper: 카메라 참조가 없습니다.");
+            enabled = false;
+            return;
+        }
+
+        if (fitToCameraOnStart)
+        {
+            FitBackgroundToCamera(bgA, bgARenderer);
+            FitBackgroundToCamera(bgB, bgBRenderer);
+        }
+
+        AlignBackgroundsToCamera();
         isScrolling = scrollOnStart;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (!isScrolling)
             return;
@@ -40,36 +60,83 @@ public class BackgroundLooper : MonoBehaviour
         bgA.position += Vector3.down * moveAmount;
         bgB.position += Vector3.down * moveAmount;
 
-        LoopIfNeeded(bgA, bgB);
-        LoopIfNeeded(bgB, bgA);
+        LoopIfNeeded(bgA, bgARenderer, bgB, bgBRenderer);
+        LoopIfNeeded(bgB, bgBRenderer, bgA, bgARenderer);
     }
 
-    private void CalculateHeight()
+    private bool ValidateReferences()
     {
-        bgHeight = bgARenderer.bounds.size.y + extraGap;
-    }
-
-    private void AlignBackgrounds()
-    {
-        Vector3 posA = bgA.position;
-        Vector3 posB = bgB.position;
-
-        bgA.position = new Vector3(posA.x, 0f, posA.z);
-        bgB.position = new Vector3(posA.x, bgHeight, posA.z);
-    }
-
-    private void LoopIfNeeded(Transform current, Transform other)
-    {
-        float lowerThreshold = -bgHeight;
-
-        if (current.position.y <= lowerThreshold)
+        if (bgA == null || bgB == null || bgARenderer == null || bgBRenderer == null)
         {
-            current.position = new Vector3(
-                other.position.x,
-                other.position.y + bgHeight,
-                other.position.z
-            );
+            Debug.LogWarning("BackgroundLooper: 배경 참조가 비어 있습니다.");
+            return false;
         }
+
+        return true;
+    }
+
+    private void FitBackgroundToCamera(Transform bg, SpriteRenderer sr)
+    {
+        if (bg == null || sr == null || sr.sprite == null || targetCamera == null)
+            return;
+
+        float camHeight = targetCamera.orthographicSize * 2f;
+        float camWidth = camHeight * targetCamera.aspect;
+
+        Vector2 spriteSize = sr.sprite.bounds.size;
+
+        if (spriteSize.x <= 0f || spriteSize.y <= 0f)
+            return;
+
+        float scaleX = camWidth / spriteSize.x;
+        float scaleY = camHeight / spriteSize.y;
+        float finalScale = Mathf.Max(scaleX, scaleY) * scaleMultiplier;
+
+        Vector3 localScale = bg.localScale;
+        bg.localScale = new Vector3(finalScale, finalScale, localScale.z);
+    }
+
+    private void AlignBackgroundsToCamera()
+    {
+        float camX = targetCamera.transform.position.x;
+        float camY = targetCamera.transform.position.y;
+
+        float heightA = GetRendererHeight(bgARenderer);
+        float heightB = GetRendererHeight(bgBRenderer);
+
+        bgA.position = new Vector3(camX, camY, bgA.position.z);
+
+        float bgBPosY = camY + (heightA * 0.5f) + (heightB * 0.5f) - seamOverlap;
+        bgB.position = new Vector3(camX, bgBPosY, bgB.position.z);
+    }
+
+    private void LoopIfNeeded(Transform current, SpriteRenderer currentRenderer, Transform other, SpriteRenderer otherRenderer)
+    {
+        if (targetCamera == null || current == null || other == null || currentRenderer == null || otherRenderer == null)
+            return;
+
+        float camBottom = targetCamera.transform.position.y - targetCamera.orthographicSize;
+
+        float currentHeight = GetRendererHeight(currentRenderer);
+        float otherHeight = GetRendererHeight(otherRenderer);
+
+        float currentTop = current.position.y + currentHeight * 0.5f;
+
+        if (currentTop <= camBottom + seamOverlap)
+        {
+            float otherTop = other.position.y + otherHeight * 0.5f;
+            float newY = otherTop + currentHeight * 0.5f - seamOverlap;
+
+            current.position = new Vector3(other.position.x, newY, current.position.z);
+        }
+    }
+
+    private float GetRendererHeight(SpriteRenderer sr)
+    {
+        if (sr == null)
+            return 0f;
+
+        return sr.bounds.size.y;
     }
 
     public void SetScrolling(bool value)
@@ -80,5 +147,25 @@ public class BackgroundLooper : MonoBehaviour
     public void SetScrollSpeed(float newSpeed)
     {
         scrollSpeed = newSpeed;
+    }
+
+    public void RefreshLayout()
+    {
+        if (!ValidateReferences())
+            return;
+
+        if (targetCamera == null)
+            targetCamera = Camera.main;
+
+        if (targetCamera == null)
+            return;
+
+        if (fitToCameraOnStart)
+        {
+            FitBackgroundToCamera(bgA, bgARenderer);
+            FitBackgroundToCamera(bgB, bgBRenderer);
+        }
+
+        AlignBackgroundsToCamera();
     }
 }

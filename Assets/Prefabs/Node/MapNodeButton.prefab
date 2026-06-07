@@ -238,8 +238,8 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
-    m_PressedColor: {r: 1, g: 1, b: 1, a: 1}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_PressedColor: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
+    m_SelectedColor: {r: 0.16078432, g: 0.16078432, b: 0.16078432, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -274,3 +274,13 @@ MonoBehaviour:
   bgImage: {fileID: 7038904450141585569}
   label: {fileID: 8133851176517612012}
   button: {fileID: 7261481246118787725}
+  iconImage: {fileID: 0}
+  lockedTextColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  normalTextColor: {r: 1, g: 1, b: 1, a: 1}
+  normalBattleSprite: {fileID: 3867594838521495272, guid: 4ba6f050d78579a448836b0f4081f96b, type: 3}
+  hardBattleSprite: {fileID: -9154829596207692212, guid: cb99b0ffa4efe0e4891fa6e7740a2deb, type: 3}
+  rewardSprite: {fileID: 3827136672426700466, guid: 0702b920b0ffb194b8a06d1931a718df, type: 3}
+  shopSprite: {fileID: -1151905075149521417, guid: b743f028e82cd7f4c8c8c9a67c93856f, type: 3}
+  bossSprite: {fileID: -6248741079362886434, guid: 9d3cdeb69c48b1d44aa91b2f739281c3, type: 3}
+  lockedNodeTint: {r: 0.55, g: 0.55, b: 0.55, a: 1}
+  normalNodeTint: {r: 1, g: 1, b: 1, a: 1}

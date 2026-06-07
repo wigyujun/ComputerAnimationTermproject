@@ -25,6 +25,7 @@ public class BattleThemeController : MonoBehaviour
         ApplyTheme(currentTheme);
     }
 
+    // 테마에 맞는 배경과 적 프리팹을 한 번에 바꿔 전투 연출을 맞춘다.
     public void ApplyTheme(ThemeType theme)
     {
         currentTheme = theme;
@@ -57,6 +58,7 @@ public class BattleThemeController : MonoBehaviour
         }
     }
 
+    // 스포너가 이후 생성할 적 프리팹을 현재 테마 기준으로 교체한다.
     private void ApplyEnemy(ThemeType theme)
     {
         if (enemySpawner == null)

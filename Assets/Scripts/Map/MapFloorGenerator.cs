@@ -7,7 +7,8 @@ public static class MapFloorGenerator
     private const float COL1_X = 300f;   // A열
     private const float COL2_X = 800f;   // B열
     private const float COL3_X = 1300f;  // C열
-    private const float COL4_X = 1800f;  // Reward / Boss
+    private const float COL4_X = 1800f;  // Shop / Reward
+    private const float COL5_X = 2300f;  // Boss
 
     // 행 위치
     private const float TOP_Y = 180f;
@@ -25,25 +26,10 @@ public static class MapFloorGenerator
         nodes.Add(a1);
         nodes.Add(a2);
 
-        // ===== B열 =====
-        MapNodeData b1;
-        MapNodeData b2;
-        MapNodeData b3;
-
-        if (IsRewardFloor(floorIndex))
-        {
-            // 1,2,4층: B열 3개, 하드 랜덤 등장
-            b1 = CreateRandomBattleNode(floorIndex, 2, 0, "B1", COL2_X, TOP_Y);
-            b2 = CreateRandomBattleNode(floorIndex, 2, 1, "B2", COL2_X, MID_Y);
-            b3 = CreateRandomBattleNode(floorIndex, 2, 2, "B3", COL2_X, BOT_Y);
-        }
-        else
-        {
-            // 3,5층: B열 3개, 하드 랜덤 등장
-            b1 = CreateRandomBattleNode(floorIndex, 2, 0, "B1", COL2_X, TOP_Y);
-            b2 = CreateRandomBattleNode(floorIndex, 2, 1, "B2", COL2_X, MID_Y);
-            b3 = CreateRandomBattleNode(floorIndex, 2, 2, "B3", COL2_X, BOT_Y);
-        }
+        // ===== B열 : 전투 3개 =====
+        MapNodeData b1 = CreateRandomBattleNode(floorIndex, 2, 0, "B1", COL2_X, TOP_Y);
+        MapNodeData b2 = CreateRandomBattleNode(floorIndex, 2, 1, "B2", COL2_X, MID_Y);
+        MapNodeData b3 = CreateRandomBattleNode(floorIndex, 2, 2, "B3", COL2_X, BOT_Y);
 
         nodes.Add(b1);
         nodes.Add(b2);
@@ -68,11 +54,11 @@ public static class MapFloorGenerator
             ConnectNodes(b2, c1, c2);
             ConnectNodes(b3, c1, c2);
 
-            // Reward
+            // ===== 4열 : Reward =====
             MapNodeData reward = CreateNode(
                 floorIndex: floorIndex,
                 columnIndex: 4,
-                laneIndex: 0,
+                laneIndex: 1,
                 nodeId: "R1",
                 nodeType: NodeType.Reward,
                 themeType: ThemeType.None,
@@ -88,7 +74,7 @@ public static class MapFloorGenerator
         }
         else if (IsBossFloor(floorIndex))
         {
-            // ===== C열 : 전투 3개, 하드 랜덤 등장 =====
+            // ===== C열 : 전투 3개 =====
             MapNodeData c1 = CreateRandomBattleNode(floorIndex, 3, 0, "C1", COL3_X, TOP_Y);
             MapNodeData c2 = CreateRandomBattleNode(floorIndex, 3, 1, "C2", COL3_X, MID_Y);
             MapNodeData c3 = CreateRandomBattleNode(floorIndex, 3, 2, "C3", COL3_X, BOT_Y);
@@ -102,24 +88,41 @@ public static class MapFloorGenerator
             ConnectNodes(b2, c1, c2, c3);
             ConnectNodes(b3, c1, c2, c3);
 
-            // Boss
-            MapNodeData boss = CreateNode(
+            // ===== 4열 : Shop 1개 =====
+            MapNodeData shop = CreateNode(
                 floorIndex: floorIndex,
                 columnIndex: 4,
-                laneIndex: 0,
-                nodeId: "Boss",
-                nodeType: NodeType.Boss,
-                themeType: GetRandomTheme(),
+                laneIndex: 1,
+                nodeId: "Shop",
+                nodeType: NodeType.Shop,
+                themeType: ThemeType.None,
                 nodeState: NodeState.Locked,
                 uiPosition: new Vector2(COL4_X, MID_Y)
             );
 
+            nodes.Add(shop);
+
+            // 연결: C열 → Shop
+            ConnectNodes(c1, shop);
+            ConnectNodes(c2, shop);
+            ConnectNodes(c3, shop);
+
+            // ===== 5열 : Boss 1개 =====
+            MapNodeData boss = CreateNode(
+                floorIndex: floorIndex,
+                columnIndex: 5,
+                laneIndex: 1,
+                nodeId: "Boss",
+                nodeType: NodeType.Boss,
+                themeType: GetBossThemeFromVisitCount(),
+                nodeState: NodeState.Locked,
+                uiPosition: new Vector2(COL5_X, MID_Y)
+            );
+
             nodes.Add(boss);
 
-            // 연결: C열 → Boss
-            ConnectNodes(c1, boss);
-            ConnectNodes(c2, boss);
-            ConnectNodes(c3, boss);
+            // 연결: Shop → Boss
+            ConnectNodes(shop, boss);
         }
         else
         {
@@ -137,7 +140,7 @@ public static class MapFloorGenerator
             MapNodeData reward = CreateNode(
                 floorIndex: floorIndex,
                 columnIndex: 4,
-                laneIndex: 0,
+                laneIndex: 1,
                 nodeId: "R1",
                 nodeType: NodeType.Reward,
                 themeType: ThemeType.None,
@@ -245,6 +248,16 @@ public static class MapFloorGenerator
         return node;
     }
 
+    private static ThemeType GetBossThemeFromVisitCount()
+    {
+        ThemeType mostVisited = RunContext.GetMostVisitedTheme();
+
+        if (mostVisited == ThemeType.None)
+            return GetRandomTheme();
+
+        return mostVisited;
+    }
+
     private static ThemeType GetRandomTheme()
     {
         int rand = Random.Range(0, 3);
@@ -273,13 +286,5 @@ public static class MapFloorGenerator
                 fromNode.nextNodeIds.Add(toNodes[i].nodeId);
             }
         }
-    }
-
-    public static MapNodeData Find(List<MapNodeData> nodes, string nodeId)
-    {
-        if (nodes == null || string.IsNullOrEmpty(nodeId))
-            return null;
-
-        return nodes.Find(n => n.nodeId == nodeId);
     }
 }

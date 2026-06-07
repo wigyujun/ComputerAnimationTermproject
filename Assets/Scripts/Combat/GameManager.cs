@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
             battleNodeController = FindAnyObjectByType<BattleNodeController>();
     }
 
+    // 전투 시작 요청을 한 번만 처리하고 EnemySpawner의 스폰 루프를 연다.
     public void BeginBattle()
     {
         Debug.Log("6) GameManager.BeginBattle 실행");
@@ -47,6 +48,7 @@ public class GameManager : MonoBehaviour
 
     // 플레이어 사망 시 다른 스크립트에서 이 메서드를 호출해도
     // BattleNodeController가 최종 패배 처리만 담당하도록 연결
+    // 플레이어 사망 시 최종 패배 처리를 BattleNodeController로 위임한다.
     public void OnPlayerDefeat()
     {
         Debug.Log("GameManager: OnPlayerDefeat 호출");
