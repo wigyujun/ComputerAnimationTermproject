@@ -13,3 +13,20 @@
 ---
 
 2D 슈팅 + 로그라이크 게임
+
+
+## 주석 파일
+* PlayerController.cs
+* AutoBowShooter.cs
+* StartMenuController.cs
+* BattleSceneEntry.cs
+* BattleThemeController.cs
+* GameManager.cs
+* BattleNodeController.cs
+* EnemySpawner.cs
+* FloorBalanceUtility.cs
+* BossBattleController.cs
+* MapManager.cs
+* RunContext.cs
+* DebugShortcutPanel.cs
+* EscapeToStartScenePanel.cs
